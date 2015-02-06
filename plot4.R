@@ -65,7 +65,7 @@ hpc_subset$datetime <- hpc_subset$datetime1
 #hpc_subset$datetime <- weekdays(hpc_subset$datetime1, abbreviate = TRUE
 
 # create a plot of 480 x 480 pixels matching: 
-# https://github.com/rdpeng/ExData_Plotting1/blob/master/figure/unnamed-chunk-4.png
+# https://github.com/rdpeng/ExData_Plotting1/blob/master/figure/unnamed-chunk-5.png
 
 png("plot4.png", width = 480, height = 480)
 par(bg = "transparent", mfcol = c(2, 2))
