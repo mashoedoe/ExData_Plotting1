@@ -1,9 +1,11 @@
+## Create plot3.png using this R script plot3.R 
+
 # This assignment uses data from the UC Irvine Machine Learning Repository, 
 # a popular repository for machine learning datasets. 
 # In particular, we will be using the “Individual household electric power 
-# consumption Data Set” which I have made available on the course web site:
+# consumption Data Set” 
 
-# Dataset: Electric power consumption [20Mb]
+## Download & unzip the data:
 
 hpc_url <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
 download.file(hpc_url, "exdata-data-household_power_consumption.zip")
@@ -13,8 +15,7 @@ unzip("exdata-data-household_power_consumption.zip", "household_power_consumptio
 # with a one-minute sampling rate over a period of almost 4 years. 
 # Different electrical quantities and some sub-metering values are available.
 
-# The following descriptions of the 9 variables in the dataset are taken from 
-# the UCI web site:
+# Descriptions of the 9 variables in the dataset:
 
 # Date: Date in format dd/mm/yyyy
 # Time: time in format hh:mm:ss
@@ -31,51 +32,45 @@ unzip("exdata-data-household_power_consumption.zip", "household_power_consumptio
 # Sub_metering_3: energy sub-metering No. 3 (in watt-hour of active energy). 
     # It corresponds to an electric water-heater and an air-conditioner.
 
-# Loading the data
-
-# When loading the dataset into R, please consider the following:
-
-# The dataset has 2,075,259 rows and 9 columns. First calculate a rough 
-# estimate of how much memory the dataset will require in memory before 
-# reading into R. 
-# Make sure your computer has enough memory (most modern computers should be fine).
-
-# We will only be using data from the dates 2007-02-01 and 2007-02-02. 
-# One alternative is to read the data from just those dates rather than 
-# reading in the entire dataset and subsetting to those dates.
-
-# You may find it useful to convert the Date and Time variables to Date/Time 
-# classes in R using the strptime() and as.Date() functions.
-
-# Note that in this dataset missing values are coded as ?.
-
+## Load the data:
+ 
+# Pass these column classes to read.table
 df_colClasses = c("character", "character", "numeric",  "numeric", "numeric", 
                   "numeric", "numeric", "numeric", "numeric")
-hpc <- read.table("household_power_consumption.txt", header = TRUE, sep = ";", 
-                  nrows = 2075259, colClasses = df_colClasses, na.strings = "?")
-# object.size(hpc)
+# Pass these column names to read.table
+df_colnames = c( "Date", "Time", "Global_active_power", "Global_reactive_power",
+                 "Voltage", "Global_intensity", "Sub_metering_1", "Sub_metering_2",       
+                 "Sub_metering_3")
+# call read.table, reading only data from 2007-02-01 and 2007-02-02 &  
+# identifying missing values as "?"
+hpc <- read.table("household_power_consumption.txt", header = FALSE, sep = ";", 
+                  skip = 66637, nrows = 2880, colClasses = df_colClasses, 
+                  col.names = df_colnames, na.strings = "?")
 
-hpc_subset <- data.frame(hpc[hpc$Date == "1/2/2007" | hpc$Date == "2/2/2007", ], 
-                         row.names = NULL)
+# concatenate data in Date and Time columns into a single column called "datetime" and 
+# convert it to Date/Time class in R using the strptime() function
+hpc$datetime <- paste(hpc$Date, hpc$Time)
+hpc$datetime <- strptime(hpc$datetime, "%d/%m/%Y %H:%M:%S")
 
-hpc_subset$datetime <- paste(hpc_subset$Date, hpc_subset$Time)
-hpc_subset$datetime1 <- strptime(hpc_subset$datetime, "%d/%m/%Y %H:%M:%S")
-# class(hpc_subset$datetime1)
-hpc_subset$datetime <- hpc_subset$datetime1
-#hpc_subset$datetime <- weekdays(hpc_subset$datetime1, abbreviate = TRUE
-
-# create a plot of 480 x 480 pixels matching: 
+## create a plot of 480 x 480 pixels that matches the following:
 # https://github.com/rdpeng/ExData_Plotting1/blob/master/figure/unnamed-chunk-4.png
 
+# call the png graphics device, passing it the desired the plot size
 png("plot3.png", width = 480, height = 480)
-par(bg = "transparent")
-with(hpc_subset, plot(x = c(datetime, datetime, datetime), 
+# If you uncomment the next line the plot background will be transparent
+# par(bg = "transparent") 
+
+# create an empty plot
+with(hpc, plot(x = c(datetime, datetime, datetime), 
                       y = c(Sub_metering_1, Sub_metering_2, Sub_metering_3), 
-                      type = "n", xlab = "", ylab = "Energy sub metering")) 
-with(hpc_subset, lines(datetime, Sub_metering_1, col = "black"))
-with(hpc_subset, lines(datetime, Sub_metering_2, col = "red"))
-with(hpc_subset, lines(datetime, Sub_metering_3, col = "blue"))
+                      type = "n", xlab = "", ylab = "Energy sub metering"))
+# add the 3 lines representing the 3 submetering columns (by date)
+with(hpc, lines(datetime, Sub_metering_1, col = "black"))
+with(hpc, lines(datetime, Sub_metering_2, col = "red"))
+with(hpc, lines(datetime, Sub_metering_3, col = "blue"))
+# add the legend
 legend("topright", c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), 
        lty=1, col=c("black", "red", "blue"), cex=0.95, box.col=1)
-dev.off()
 
+# turn the png graphics device off
+dev.off()
